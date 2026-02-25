@@ -1,0 +1,65 @@
+{% extends "garden/base.html" %}
+{% load garden_tags %}
+{% block title %}Kasvit — Puutarhapäiväkirja{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+    <h1>🌻 Kasvilajit</h1>
+    <a href="{% url 'lisaa_kasvilaji' %}" class="btn btn-outline btn-sm">+ Lisää uusi kasvilaji</a>
+</div>
+
+<!-- Kategoriasuodatus -->
+<div class="flex-gap mb-1 mt-1">
+    <a href="{% url 'kasvilista' %}" class="btn {% if not valittu_kategoria %}btn-primary{% else %}btn-outline{% endif %} btn-sm">Kaikki</a>
+    {% for kat in kategoriat %}
+    <a href="{% url 'kasvilista' %}?kategoria={{ kat }}"
+       class="btn {% if valittu_kategoria == kat %}btn-primary{% else %}btn-outline{% endif %} btn-sm">
+        {{ kat }}
+    </a>
+    {% endfor %}
+</div>
+
+{% if kasvit %}
+<div class="grid-2">
+    {% for kasvi in kasvit %}
+    <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: start;">
+            <div>
+                <h3 style="margin: 0;">{{ kasvi.nimi }}</h3>
+                {% if kasvi.lajike %}<div class="text-muted" style="font-size: 0.85rem;">'{{ kasvi.lajike }}'</div>{% endif %}
+                <div class="text-muted" style="font-size: 0.85rem;">{{ kasvi.kategoria }}</div>
+            </div>
+            <a href="{% url 'lisaa_viljely' %}?kasvilaji={{ kasvi.pk }}" class="btn btn-primary btn-sm">+ Lisää kasvi</a>
+        </div>
+
+        {% if kasvi.kuvaus %}
+        <p style="font-size: 0.85rem; margin-top: 0.5rem;">{{ kasvi.kuvaus|truncatewords:25 }}</p>
+        {% endif %}
+
+        <div style="margin-top: 0.5rem; font-size: 0.8rem;">
+            <span class="badge badge-kylvo">🌱 Kylvö: {{ kasvi.kylvo_alku_kk|kk_nimi }}–{{ kasvi.kylvo_loppu_kk|kk_nimi }}</span>
+            <span class="badge badge-sato">🍅 Sato: {{ kasvi.sato_alku_kk|kk_nimi }}–{{ kasvi.sato_loppu_kk|kk_nimi }}</span>
+        </div>
+
+        <div style="margin-top: 0.4rem; font-size: 0.8rem; color: var(--text-muted);">
+            ☀️ {{ kasvi.get_kasvupaikka_display }}
+            {% if kasvi.korkeus_cm %} · 📏 {{ kasvi.korkeus_cm }} cm{% endif %}
+            · ⏱️ Itäminen {{ kasvi.itamisaika_min_pv }}–{{ kasvi.itamisaika_max_pv }} pv
+        </div>
+
+        {% if kasvi.nelson_garden_url %}
+        <div style="margin-top: 0.3rem;">
+            <a href="{{ kasvi.nelson_garden_url }}" target="_blank" style="font-size: 0.8rem; color: var(--accent);">
+                🔗 Nelson Garden
+            </a>
+        </div>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="card text-center">
+    <p class="text-muted">Ei kasveja tässä kategoriassa.</p>
+</div>
+{% endif %}
+{% endblock %}

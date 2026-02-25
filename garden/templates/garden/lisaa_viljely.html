@@ -1,0 +1,26 @@
+{% extends "garden/base.html" %}
+{% block title %}Lisää viljely — Puutarhapäiväkirja{% endblock %}
+
+{% block content %}
+<p><a href="{% url 'etusivu' %}" style="color: var(--accent);">← Takaisin</a></p>
+
+<div class="card">
+    <h1>🌱 Lisää uusi kasvi viljeltäväksi</h1>
+    <form method="post">
+        {% csrf_token %}
+        {% for field in form %}
+        <div style="margin-bottom: 0.5rem;">
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% if field.help_text %}
+            <div class="text-muted" style="font-size: 0.8rem;">{{ field.help_text }}</div>
+            {% endif %}
+            {% for error in field.errors %}
+            <div style="color: #c62828; font-size: 0.85rem;">{{ error }}</div>
+            {% endfor %}
+        </div>
+        {% endfor %}
+        <button type="submit" class="btn btn-primary mt-1">Tallenna</button>
+    </form>
+</div>
+{% endblock %}

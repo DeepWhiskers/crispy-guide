@@ -1,0 +1,186 @@
+{% extends "garden/base.html" %}
+{% block title %}Puutarhapäiväkirja — Etusivu{% endblock %}
+
+{% block content %}
+<h1>🌿 Puutarhapäiväkirja</h1>
+
+<!-- OMAT VILJELYT -->
+<div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+        <h2 style="margin: 0;">🪴 Kasvatettavat kasvit</h2>
+        <a href="{% url 'lisaa_viljely' %}" class="btn btn-primary btn-sm">+ Lisää kasvi</a>
+    </div>
+
+    {% if omat_viljelyt %}
+        {% for v in omat_viljelyt %}
+        <div class="viljely-item">
+            <div>
+                <a href="{% url 'viljely_detail' v.pk %}" class="viljely-nimi" style="color: var(--accent); text-decoration: none;">
+                    {{ v.kasvilaji }}
+                </a>
+                <div class="viljely-meta">
+                    {% if v.kasvupaikka %}📍 {{ v.kasvupaikka }}{% endif %}
+                    {% if v.kylvopaiva %} · Kylvetty {{ v.kylvopaiva }}{% endif %}
+                </div>
+            </div>
+            <div class="flex-gap">
+                <form method="post" action="{% url 'vaihda_tila' v.pk %}" style="display: flex; gap: 0.3rem; align-items: center;">
+                    {% csrf_token %}
+                    <select name="tila" style="width: auto; margin: 0; padding: 0.3rem;" onchange="this.form.submit()">
+                        {% for val, label in v.TILA_CHOICES %}
+                        <option value="{{ val }}" {% if v.tila == val %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <p class="text-muted mt-1">Ei vielä viljelymerkintöjä. <a href="{% url 'kasvilista' %}">Selaa kasveja</a> ja lisää ensimmäinen!</p>
+    {% endif %}
+</div>
+
+<!-- KASVUKALENTERI -->
+<div class="card">
+    <h2 style="margin: 0 0 1rem 0;">📅 Kasvukalenteri</h2>
+    {% if kasvukalenteri %}
+    <div class="kalenteri-selite flex-gap mb-1" style="font-size: 0.8rem;">
+        <span class="selite-item"><span class="selite-box selite-kylvo"></span> Kylvöaika</span>
+        <span class="selite-item"><span class="selite-box selite-kasvu"></span> Kasvu</span>
+        <span class="selite-item"><span class="selite-box selite-sato"></span> Sadonkorjuu</span>
+        <span class="selite-item"><span class="selite-box selite-today"></span> Tänään</span>
+    </div>
+
+    <div class="gantt-container">
+        <table class="gantt-table">
+            <thead>
+                <tr>
+                    <th class="gantt-label-col"></th>
+                    {% for kk_nimi in kk_otsikot %}
+                    <th class="gantt-kk {% if forloop.counter == tama_kk %}gantt-kk-now{% endif %}">{{ kk_nimi }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for ryhma in kasvukalenteri %}
+                <tr class="gantt-kategoria-row">
+                    <td class="gantt-kategoria" colspan="13">{{ ryhma.kategoria }}</td>
+                </tr>
+                {% for kasvi in ryhma.kasvit %}
+                <tr class="gantt-row">
+                    <td class="gantt-nimi">
+                        <a href="{% url 'viljely_detail' kasvi.viljely.pk %}">
+                            {{ kasvi.nimi }}
+                        </a>
+                    </td>
+                    {% for kk in kasvi.kuukaudet %}
+                    <td class="gantt-cell {% if kk.tyyppi %}gantt-{{ kk.tyyppi }}{% endif %} {% if kk.nykyinen and kk.tyyppi %}gantt-today{% endif %}">
+                        {% if kk.tyyppi %}<span class="gantt-kk-label">{{ kk.nimi }}</span>{% endif %}
+                    </td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p class="text-muted mt-1">Lisää kasveja puutarhaasi niin näet niiden kasvukalenterin täällä.</p>
+    {% endif %}
+</div>
+
+<style>
+    /* === SELITE === */
+    .selite-item { display: inline-flex; align-items: center; gap: 0.3rem; margin-right: 1rem; }
+    .selite-box { display: inline-block; width: 20px; height: 14px; border-radius: 3px; }
+    .selite-kylvo { background: #b3e5fc; }
+    .selite-kasvu { background: #c5e1a5; }
+    .selite-sato { background: #ffcc80; }
+    .selite-today { width: 20px; height: 14px; border: 2px solid var(--accent); border-radius: 3px; background: transparent; }
+
+    /* === GANTT TAULU === */
+    .gantt-container { overflow-x: auto; margin-top: 0.5rem; }
+    .gantt-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 2px;
+        table-layout: fixed;
+        min-width: 700px;
+    }
+    .gantt-table th, .gantt-table td { border: none; }
+
+    .gantt-label-col { width: 170px; min-width: 130px; }
+
+    /* Kuukausiotsikot */
+    .gantt-kk {
+        text-align: center;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--text-muted);
+        padding: 0.4rem 0.15rem;
+    }
+    .gantt-kk-now { color: var(--accent); font-weight: 700; }
+
+    /* Kategoriaotsikko */
+    .gantt-kategoria-row td { padding-top: 1rem; padding-bottom: 0.2rem; }
+    .gantt-kategoria {
+        font-weight: 700;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        letter-spacing: 0.05em;
+    }
+
+    /* Kasvirivi */
+    .gantt-row td { padding: 0; height: 30px; }
+    .gantt-nimi {
+        font-size: 0.85rem;
+        font-weight: 500;
+        padding-right: 0.6rem !important;
+        white-space: nowrap;
+        vertical-align: middle;
+    }
+    .gantt-nimi a {
+        color: var(--text);
+        text-decoration: none;
+    }
+    .gantt-nimi a:hover { color: var(--accent); }
+
+    /* Solut */
+    .gantt-cell {
+        text-align: center;
+        vertical-align: middle;
+        position: relative;
+        background: var(--bg);
+    }
+    .gantt-kk-label {
+        font-size: 0.6rem;
+        font-weight: 500;
+        opacity: 0.6;
+    }
+
+    /* Tyyppivärit (vaalea tila) */
+    .gantt-kylvo { background: #b3e5fc; }
+    .gantt-kasvu { background: #c5e1a5; }
+    .gantt-sato { background: #ffcc80; }
+
+    /* Tänään-korostus */
+    .gantt-today {
+        outline: 2px solid var(--accent);
+        outline-offset: -2px;
+        z-index: 2;
+        position: relative;
+    }
+
+    /* Tumma tila */
+    @media (prefers-color-scheme: dark) {
+        .gantt-kylvo { background: #1a4a5c; }
+        .gantt-kasvu { background: #2e5a30; }
+        .gantt-sato { background: #6b4400; }
+        .selite-kylvo { background: #1a4a5c; }
+        .selite-kasvu { background: #2e5a30; }
+        .selite-sato { background: #6b4400; }
+        .gantt-cell { background: var(--bg-card); }
+    }
+</style>
+{% endblock %}

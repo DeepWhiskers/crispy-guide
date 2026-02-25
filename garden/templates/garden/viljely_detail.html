@@ -1,0 +1,104 @@
+{% extends "garden/base.html" %}
+{% block title %}{{ viljely.kasvilaji }} — Puutarhapäiväkirja{% endblock %}
+
+{% block content %}
+<p><a href="{% url 'etusivu' %}" style="color: var(--accent);">← Takaisin etusivulle</a></p>
+
+<div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: start; flex-wrap: wrap; gap: 0.5rem;">
+        <div>
+            <h1 style="margin-bottom: 0.3rem;">{{ viljely.kasvilaji }}</h1>
+            {% if viljely.kasvupaikka %}
+            <div class="text-muted">📍 {{ viljely.kasvupaikka }}</div>
+            {% endif %}
+        </div>
+        <form method="post" action="{% url 'viljely_detail' viljely.pk %}" class="flex-gap">
+            {% csrf_token %}
+            <input type="hidden" name="vaihda_tila" value="1">
+            <select name="tila" style="width: auto; margin: 0;" onchange="this.form.submit()">
+                {% for val, label in viljely.TILA_CHOICES %}
+                <option value="{{ val }}" {% if viljely.tila == val %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </form>
+    </div>
+</div>
+
+<!-- Kasvin tiedot -->
+<div class="grid-2">
+    <div class="card">
+        <h3>📋 Kasvin tiedot</h3>
+        <table>
+            <tr><th>Laji</th><td>{{ viljely.kasvilaji.nimi }}{% if viljely.kasvilaji.lajike %} '{{ viljely.kasvilaji.lajike }}'{% endif %}</td></tr>
+            <tr><th>Kategoria</th><td>{{ viljely.kasvilaji.kategoria }}</td></tr>
+            <tr><th>Kasvupaikka</th><td>{{ viljely.kasvilaji.get_kasvupaikka_display }}</td></tr>
+            <tr><th>Kylvö</th><td>{{ viljely.kasvilaji.kylvo_alku_kk }}–{{ viljely.kasvilaji.kylvo_loppu_kk }} kk</td></tr>
+            <tr><th>Sato</th><td>{{ viljely.kasvilaji.sato_alku_kk }}–{{ viljely.kasvilaji.sato_loppu_kk }} kk</td></tr>
+            <tr><th>Itämisaika</th><td>{{ viljely.kasvilaji.itamisaika_min_pv }}–{{ viljely.kasvilaji.itamisaika_max_pv }} pv</td></tr>
+            {% if viljely.kasvilaji.korkeus_cm %}
+            <tr><th>Korkeus</th><td>{{ viljely.kasvilaji.korkeus_cm }} cm</td></tr>
+            {% endif %}
+        </table>
+    </div>
+
+    <div class="card">
+        <h3>🌱 Viljelytiedot</h3>
+        <table>
+            <tr><th>Tila</th><td>{{ viljely.get_tila_display }}</td></tr>
+            <tr><th>Kylvöpäivä</th><td>{{ viljely.kylvopaiva|default:"Ei merkitty" }}</td></tr>
+            <tr><th>Arvioitu sato</th><td>{{ viljely.arvioitu_sato|default:"—" }}</td></tr>
+            <tr><th>Lisätty</th><td>{{ viljely.lisatty|date:"d.m.Y" }}</td></tr>
+        </table>
+        {% if viljely.muistiinpanot %}
+        <div style="margin-top: 0.8rem;">
+            <strong>Muistiinpanot:</strong>
+            <p style="font-size: 0.9rem;">{{ viljely.muistiinpanot }}</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% if viljely.kasvilaji.kasvatusohje %}
+<div class="card">
+    <h3>📖 Kasvatusohje</h3>
+    <p style="font-size: 0.9rem;">{{ viljely.kasvilaji.kasvatusohje }}</p>
+</div>
+{% endif %}
+
+<!-- Havainnot -->
+<div class="card">
+    <h2>📝 Havainnot</h2>
+
+    {% if havainnot %}
+    <div style="margin-top: 0.8rem;">
+        {% for h in havainnot %}
+        <div class="timeline-item">
+            <div class="timeline-date">{{ h.paivamaara|date:"d.m.Y" }}</div>
+            <div>{{ h.havainto }}</div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="text-muted mt-1">Ei vielä havaintoja.</p>
+    {% endif %}
+
+    <!-- Uusi havainto -->
+    <div style="margin-top: 1.2rem; padding-top: 1rem; border-top: 1px solid var(--border);">
+        <h3>Lisää havainto</h3>
+        <form method="post" action="{% url 'viljely_detail' viljely.pk %}">
+            {% csrf_token %}
+            <input type="hidden" name="lisaa_havainto" value="1">
+            <div class="grid-2">
+                <div>
+                    <label for="id_paivamaara">Päivämäärä</label>
+                    {{ note_form.paivamaara }}
+                </div>
+                <div></div>
+            </div>
+            <label for="id_havainto">Havainto</label>
+            {{ note_form.havainto }}
+            <button type="submit" class="btn btn-primary">Tallenna havainto</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

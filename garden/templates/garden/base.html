@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Puutarhapäiväkirja{% endblock %}</title>
+    <style>
+        /* === RESET & BASE === */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg: #f5f7f0;
+            --bg-card: #ffffff;
+            --text: #2d3a1e;
+            --text-muted: #6b7b5a;
+            --accent: #4a7c3f;
+            --accent-light: #e8f5e3;
+            --border: #d4dfc8;
+            --shadow: rgba(0,0,0,0.08);
+            --kylvo: #2e7d32;
+            --sato: #e65100;
+            --radius: 10px;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #1a2412;
+                --bg-card: #253318;
+                --text: #dde8d0;
+                --text-muted: #9aab85;
+                --accent: #7bc96a;
+                --accent-light: #2d4a24;
+                --border: #3d5230;
+                --shadow: rgba(0,0,0,0.3);
+                --kylvo: #81c784;
+                --sato: #ffab40;
+            }
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* === NAV === */
+        nav {
+            background: var(--accent);
+            color: white;
+            padding: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 8px var(--shadow);
+        }
+        nav .nav-inner {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        nav .logo {
+            font-size: 1.3rem;
+            font-weight: 700;
+            text-decoration: none;
+            color: white;
+        }
+        nav .nav-links { display: flex; gap: 1rem; flex-wrap: wrap; }
+        nav .nav-links a {
+            color: rgba(255,255,255,0.9);
+            text-decoration: none;
+            font-size: 0.95rem;
+            padding: 0.3rem 0.6rem;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+        nav .nav-links a:hover { background: rgba(255,255,255,0.15); }
+
+        /* === MAIN === */
+        main {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 1.5rem 1rem;
+        }
+
+        h1 { font-size: 1.6rem; margin-bottom: 1rem; }
+        h2 { font-size: 1.3rem; margin: 1.5rem 0 0.8rem; }
+        h3 { font-size: 1.1rem; margin: 1rem 0 0.5rem; }
+
+        /* === CARDS === */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.2rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 6px var(--shadow);
+        }
+
+        /* === GRID === */
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+        @media (max-width: 768px) {
+            .grid-2, .grid-3 { grid-template-columns: 1fr; }
+        }
+
+        /* === BUTTONS === */
+        .btn {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            text-decoration: none;
+            transition: opacity 0.2s;
+        }
+        .btn:hover { opacity: 0.85; }
+        .btn-primary { background: var(--accent); color: white; }
+        .btn-sm { padding: 0.3rem 0.7rem; font-size: 0.85rem; }
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--accent);
+            color: var(--accent);
+        }
+
+        /* === FORMS === */
+        form label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+            font-size: 0.9rem;
+        }
+        form input, form select, form textarea {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: var(--bg);
+            color: var(--text);
+            font-size: 0.95rem;
+            margin-bottom: 0.8rem;
+        }
+        form textarea { resize: vertical; }
+
+        /* === BADGES === */
+        .badge {
+            display: inline-block;
+            padding: 0.2rem 0.6rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .badge-kylvo { background: var(--accent-light); color: var(--kylvo); }
+        .badge-sato { background: #fff3e0; color: var(--sato); }
+        @media (prefers-color-scheme: dark) {
+            .badge-sato { background: #3e2700; }
+        }
+
+        /* === CALENDAR === */
+        .kalenteri-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.5rem;
+        }
+        @media (max-width: 900px) {
+            .kalenteri-grid { grid-template-columns: repeat(3, 1fr); }
+        }
+        @media (max-width: 600px) {
+            .kalenteri-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        .kk-cell {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.6rem;
+            font-size: 0.8rem;
+            min-height: 80px;
+        }
+        .kk-cell.nykyinen {
+            border-color: var(--accent);
+            border-width: 2px;
+            box-shadow: 0 0 8px rgba(74, 124, 63, 0.3);
+        }
+        .kk-cell .kk-nimi {
+            font-weight: 700;
+            font-size: 0.85rem;
+            margin-bottom: 0.3rem;
+        }
+        .kk-cell .kk-items { font-size: 0.75rem; line-height: 1.4; }
+
+        /* === VILJELY LISTA === */
+        .viljely-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            padding: 0.8rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .viljely-item:last-child { border-bottom: none; }
+        .viljely-nimi { font-weight: 600; }
+        .viljely-meta { color: var(--text-muted); font-size: 0.85rem; }
+
+        /* === TABLE === */
+        table { width: 100%; border-collapse: collapse; }
+        th, td {
+            padding: 0.5rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.9rem;
+        }
+        th { font-weight: 700; }
+
+        /* === TIMELINE === */
+        .timeline-item {
+            padding: 0.8rem 0 0.8rem 1.5rem;
+            border-left: 3px solid var(--accent);
+            position: relative;
+            margin-bottom: 0.3rem;
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -6px;
+            top: 1rem;
+            width: 10px;
+            height: 10px;
+            background: var(--accent);
+            border-radius: 50%;
+        }
+        .timeline-date {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        /* === UTILS === */
+        .mt-1 { margin-top: 1rem; }
+        .mb-1 { margin-bottom: 1rem; }
+        .text-muted { color: var(--text-muted); }
+        .text-center { text-align: center; }
+        .flex-gap { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="nav-inner">
+            <a href="{% url 'etusivu' %}" class="logo">ZenGarden</a>
+            <div class="nav-links">
+                <a href="{% url 'etusivu' %}">Etusivu</a>
+                <a href="{% url 'kasvilista' %}">Kasvilajit</a>
+                <a href="{% url 'lisaa_viljely' %}">+ Lisää kasvi</a>
+                <a href="/admin/">Admin</a>
+            </div>
+        </div>
+    </nav>
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>
