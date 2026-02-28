@@ -14,7 +14,7 @@ class GardenNoteInline(admin.TabularInline):
 class PlantSpeciesAdmin(admin.ModelAdmin):
     list_display = ('nimi', 'lajike', 'kategoria', 'kasvupaikka', 'kylvo_alku_kk', 'kylvo_loppu_kk')
     list_filter = ('kategoria', 'kasvupaikka')
-    search_fields = ('nimi', 'lajike', 'kategoria')
+    search_fields = ('nimi', 'lajike', 'kategoria__name')
     fieldsets = (
         ('Perustiedot', {
             'fields': ('nimi', 'lajike', 'kategoria', 'kuvaus', 'kasvatusohje')

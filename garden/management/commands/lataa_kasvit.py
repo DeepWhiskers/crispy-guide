@@ -1,6 +1,6 @@
 """Lataa esimerkkikasvit tietokantaan."""
 from django.core.management.base import BaseCommand
-from garden.models import PlantSpecies
+from garden.models import PlantSpecies, Category
 
 
 KASVIT = [
@@ -181,8 +181,28 @@ class Command(BaseCommand):
     help = 'Lataa esimerkkikasvit tietokantaan'
 
     def handle(self, *args, **options):
+        # Mappings for initial setup
+        category_map = {
+            'Chili': '🌶️ Chili',
+            'Juurekset': '🥕 Juurekset',
+            'Marjat': '🍓 Marjat',
+            'Palkokasvit': '🫛 Palkokasvit',
+            'Salaatti': '🥬 Salaatti',
+            'Tomaatti': '🍅 Tomaatti',
+            'Vihannekset': '🥦 Vihannekset',
+            'Yrtit': '🌿 Yrtit',
+        }
+        
         created_count = 0
-        for data in KASVIT:
+        for raw_data in KASVIT:
+            data = raw_data.copy()
+            
+            old_cat = data.pop('kategoria')
+            new_name = category_map.get(old_cat, f"🌱 {old_cat}")
+            category_obj, _ = Category.objects.get_or_create(name=new_name)
+            
+            data['kategoria'] = category_obj
+
             obj, created = PlantSpecies.objects.get_or_create(
                 nimi=data['nimi'],
                 lajike=data.get('lajike', ''),

@@ -2,15 +2,16 @@
 from datetime import date
 from django.test import TestCase, Client
 from django.urls import reverse
-from .models import PlantSpecies, MyGarden, GardenNote
+from .models import PlantSpecies, MyGarden, GardenNote, Category
 
 
 class PlantSpeciesModelTest(TestCase):
     """Testit PlantSpecies-mallille."""
 
     def setUp(self):
+        self.kat_tomaatti = Category.objects.create(name='🍅 Tomaatti')
         self.kasvi = PlantSpecies.objects.create(
-            nimi='Tomaatti', lajike='Sungold F1', kategoria='Tomaatti',
+            nimi='Tomaatti', lajike='Sungold F1', kategoria=self.kat_tomaatti,
             kylvo_alku_kk=2, kylvo_loppu_kk=4,
             sato_alku_kk=7, sato_loppu_kk=9,
             itamisaika_min_pv=5, itamisaika_max_pv=15,
@@ -21,8 +22,9 @@ class PlantSpeciesModelTest(TestCase):
         self.assertEqual(str(self.kasvi), "Tomaatti 'Sungold F1'")
 
     def test_str_ilman_lajiketta(self):
+        kat_yrtit = Category.objects.create(name='🌿 Yrtit')
         kasvi = PlantSpecies.objects.create(
-            nimi='Tilli', kategoria='Yrtit',
+            nimi='Tilli', kategoria=kat_yrtit,
             kylvo_alku_kk=4, kylvo_loppu_kk=6,
             sato_alku_kk=6, sato_loppu_kk=9,
         )
@@ -39,8 +41,9 @@ class MyGardenModelTest(TestCase):
     """Testit MyGarden-mallille."""
 
     def setUp(self):
+        self.kat_tomaatti = Category.objects.create(name='🍅 Tomaatti')
         self.kasvi = PlantSpecies.objects.create(
-            nimi='Tomaatti', kategoria='Tomaatti',
+            nimi='Tomaatti', kategoria=self.kat_tomaatti,
             kylvo_alku_kk=2, kylvo_loppu_kk=4,
             sato_alku_kk=7, sato_loppu_kk=9,
         )
@@ -66,8 +69,9 @@ class GardenNoteModelTest(TestCase):
     """Testit GardenNote-mallille."""
 
     def setUp(self):
+        kat_yrtit = Category.objects.create(name='🌿 Yrtit')
         kasvi = PlantSpecies.objects.create(
-            nimi='Basilika', kategoria='Yrtit',
+            nimi='Basilika', kategoria=kat_yrtit,
             kylvo_alku_kk=3, kylvo_loppu_kk=5,
             sato_alku_kk=6, sato_loppu_kk=9,
         )
@@ -87,8 +91,9 @@ class ViewsTest(TestCase):
 
     def setUp(self):
         self.client = Client()
+        self.kat_tomaatti = Category.objects.create(name='🍅 Tomaatti')
         self.kasvi = PlantSpecies.objects.create(
-            nimi='Tomaatti', kategoria='Tomaatti',
+            nimi='Tomaatti', kategoria=self.kat_tomaatti,
             kylvo_alku_kk=2, kylvo_loppu_kk=4,
             sato_alku_kk=7, sato_loppu_kk=9,
         )
@@ -108,7 +113,7 @@ class ViewsTest(TestCase):
         self.assertContains(response, 'Tomaatti')
 
     def test_kasvilista_suodatus(self):
-        response = self.client.get(reverse('kasvilista') + '?kategoria=Tomaatti')
+        response = self.client.get(reverse('kasvilista') + '?kategoria=🍅 Tomaatti')
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Tomaatti')
 

@@ -26,7 +26,7 @@ class EtusivuView(View):
         kategoriat_dict = {}
         for v in omat_viljelyt:
             laji = v.kasvilaji
-            kat = laji.kategoria
+            kat = laji.kategoria.name if laji.kategoria else ''
             if kat not in kategoriat_dict:
                 kategoriat_dict[kat] = []
 
@@ -87,14 +87,14 @@ class KasvilistaView(ListView):
         qs = super().get_queryset()
         kategoria = self.request.GET.get('kategoria')
         if kategoria:
-            qs = qs.filter(kategoria=kategoria)
+            qs = qs.filter(kategoria__name=kategoria)
         return qs
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['kategoriat'] = (
-            PlantSpecies.objects.values_list('kategoria', flat=True)
-            .distinct().order_by('kategoria')
+            PlantSpecies.objects.values_list('kategoria__name', flat=True)
+            .distinct().order_by('kategoria__name')
         )
         context['valittu_kategoria'] = self.request.GET.get('kategoria', '')
         return context

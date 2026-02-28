@@ -2,6 +2,18 @@
 from django.db import models
 
 
+class Category(models.Model):
+    """Kasvikategoria."""
+    name = models.CharField('Kategoria', max_length=50, unique=True)
+
+    class Meta:
+        verbose_name = 'Kategoria'
+        verbose_name_plural = 'Kategoriat'
+        ordering = ['name']
+
+    def __str__(self):
+        return self.name
+
 class PlantSpecies(models.Model):
     """Kasvilaji Nelson Gardenin tuotetietojen mukaan."""
 
@@ -18,7 +30,10 @@ class PlantSpecies(models.Model):
     )
     nimi = models.CharField('Nimi', max_length=100)
     lajike = models.CharField('Lajike', max_length=100, blank=True, default='')
-    kategoria = models.CharField('Kategoria', max_length=50)
+    kategoria = models.ForeignKey(
+        Category, on_delete=models.CASCADE,
+        verbose_name='Kategoria', related_name='lajit'
+    )
     kuvaus = models.TextField('Kuvaus', blank=True, default='')
     kasvatusohje = models.TextField('Kasvatusohje', blank=True, default='')
 
