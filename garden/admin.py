@@ -1,6 +1,13 @@
 """Puutarhapäiväkirjan admin-konfiguraatio."""
 from django.contrib import admin
-from .models import PlantSpecies, MyGarden, GardenNote
+from .models import PlantSpecies, MyGarden, GardenNote, Category
+
+
+class CategoryAdmin(admin.ModelAdmin):
+    list_display = ('name',)
+    search_fields = ('name',)
+
+admin.site.register(Category, CategoryAdmin)
 
 
 class GardenNoteInline(admin.TabularInline):
