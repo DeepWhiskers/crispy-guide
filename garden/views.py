@@ -19,6 +19,7 @@ class EtusivuView(View):
     """Etusivu: kasvukalenteri (omat viljelyt) ja viljelylista."""
 
     def get(self, request):
+        """Käsittelee GET-pyynnön ja palauttaa etusivun näkymän."""
         tama_kk = date.today().month
         omat_viljelyt = MyGarden.objects.exclude(tila='paattynyt').select_related('kasvilaji')
 
@@ -84,6 +85,7 @@ class KasvilistaView(ListView):
     context_object_name = 'kasvit'
 
     def get_queryset(self):
+        """Palauttaa kasvilajit suodatettuna kategorialla (jos annettu)."""
         qs = super().get_queryset()
         kategoria = self.request.GET.get('kategoria')
         if kategoria:
@@ -91,6 +93,7 @@ class KasvilistaView(ListView):
         return qs
 
     def get_context_data(self, **kwargs):
+        """Lisää kategoriat ja valitun kategorian näkymän kontekstiin."""
         context = super().get_context_data(**kwargs)
         context['kategoriat'] = (
             PlantSpecies.objects.values_list('kategoria__name', flat=True)
@@ -107,6 +110,7 @@ class LisaaViljelyView(CreateView):
     template_name = 'garden/lisaa_viljely.html'
 
     def get_initial(self):
+        """Asettaa alustavat arvot lomakkeelle (esim. kasvilaji url-parametrista)."""
         initial = super().get_initial()
         kasvilaji_id = self.request.GET.get('kasvilaji')
         if kasvilaji_id:
@@ -114,6 +118,7 @@ class LisaaViljelyView(CreateView):
         return initial
 
     def get_success_url(self):
+        """Palauttaa URL-osoitteen, johon ohjataan onnistuneen tallennuksen jälkeen."""
         return reverse('etusivu')
 
 
@@ -124,6 +129,7 @@ class LisaaKasvilajiView(CreateView):
     template_name = 'garden/lisaa_kasvilaji.html'
 
     def get_success_url(self):
+        """Palauttaa URL-osoitteen, johon ohjataan onnistuneen tallennuksen jälkeen."""
         return reverse('kasvilista')
 
 
@@ -131,6 +137,7 @@ class ViljelyDetailView(View):
     """Viljelymerkinnän yksityiskohdat + havainnot."""
 
     def get(self, request, pk):
+        """Käsittelee GET-pyynnön viljelymerkinnän tiedoille."""
         viljely = get_object_or_404(
             MyGarden.objects.select_related('kasvilaji'), pk=pk
         )
@@ -146,6 +153,7 @@ class ViljelyDetailView(View):
         })
 
     def post(self, request, pk):
+        """Käsittelee POST-pyynnön (tilan vaihto tai uusi havainto)."""
         viljely = get_object_or_404(MyGarden, pk=pk)
 
         # Tilan vaihto
@@ -171,6 +179,7 @@ class VaihdaTilaView(View):
     """Tilan vaihto etusivulta (AJAX-tyylinen POST)."""
 
     def post(self, request, pk):
+        """Käsittelee POST-pyynnön tilan vaihtamiseksi."""
         viljely = get_object_or_404(MyGarden, pk=pk)
         tila_form = TilaForm(request.POST, instance=viljely)
         if tila_form.is_valid():

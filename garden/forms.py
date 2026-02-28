@@ -7,6 +7,7 @@ class MyGardenForm(forms.ModelForm):
     """Lomake uuden viljelymerkinnän luomiseen."""
 
     class Meta:
+        """Metatiedot MyGardenForm-lomakkeelle."""
         model = MyGarden
         fields = ['kasvilaji', 'kasvupaikka', 'tila', 'kylvopaiva', 'muistiinpanot']
         widgets = {
@@ -19,6 +20,7 @@ class TilaForm(forms.ModelForm):
     """Lomake tilan vaihtamiseen."""
 
     class Meta:
+        """Metatiedot TilaForm-lomakkeelle."""
         model = MyGarden
         fields = ['tila']
 
@@ -27,6 +29,7 @@ class GardenNoteForm(forms.ModelForm):
     """Lomake uuden havainnon lisäämiseen."""
 
     class Meta:
+        """Metatiedot GardenNoteForm-lomakkeelle."""
         model = GardenNote
         fields = ['paivamaara', 'havainto']
         widgets = {
@@ -39,6 +42,7 @@ class PlantSpeciesForm(forms.ModelForm):
     """Lomake uuden kasvilajin lisäämiseen."""
 
     class Meta:
+        """Metatiedot PlantSpeciesForm-lomakkeelle."""
         model = PlantSpecies
         fields = [
             'nimi', 'lajike', 'kategoria', 'kuvaus', 'kasvatusohje',

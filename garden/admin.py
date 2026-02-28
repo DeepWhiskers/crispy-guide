@@ -4,6 +4,7 @@ from .models import PlantSpecies, MyGarden, GardenNote, Category
 
 
 class CategoryAdmin(admin.ModelAdmin):
+    """Admin-konfiguraatio Category-mallille."""
     list_display = ('name',)
     search_fields = ('name',)
 
@@ -19,6 +20,7 @@ class GardenNoteInline(admin.TabularInline):
 
 @admin.register(PlantSpecies)
 class PlantSpeciesAdmin(admin.ModelAdmin):
+    """Admin-konfiguraatio PlantSpecies-mallille."""
     list_display = ('nimi', 'lajike', 'kategoria', 'kasvupaikka', 'kylvo_alku_kk', 'kylvo_loppu_kk')
     list_filter = ('kategoria', 'kasvupaikka')
     search_fields = ('nimi', 'lajike', 'kategoria__name')
@@ -45,6 +47,7 @@ class PlantSpeciesAdmin(admin.ModelAdmin):
 
 @admin.register(MyGarden)
 class MyGardenAdmin(admin.ModelAdmin):
+    """Admin-konfiguraatio MyGarden-mallille."""
     list_display = ('kasvilaji', 'kasvupaikka', 'tila', 'kylvopaiva', 'lisatty')
     list_filter = ('tila',)
     search_fields = ('kasvilaji__nimi', 'kasvupaikka')
@@ -53,10 +56,12 @@ class MyGardenAdmin(admin.ModelAdmin):
 
 @admin.register(GardenNote)
 class GardenNoteAdmin(admin.ModelAdmin):
+    """Admin-konfiguraatio GardenNote-mallille."""
     list_display = ('kasvi', 'paivamaara', 'havainto_lyhyt')
     list_filter = ('paivamaara',)
     search_fields = ('havainto',)
 
     def havainto_lyhyt(self, obj):
+        """Palauttaa havainnosta lyhennetyn version listanäkymää varten."""
         return obj.havainto[:80] + '...' if len(obj.havainto) > 80 else obj.havainto
     havainto_lyhyt.short_description = 'Havainto'

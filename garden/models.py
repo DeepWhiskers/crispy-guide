@@ -7,11 +7,13 @@ class Category(models.Model):
     name = models.CharField('Kategoria', max_length=50, unique=True)
 
     class Meta:
+        """Metatiedot Category-mallille."""
         verbose_name = 'Kategoria'
         verbose_name_plural = 'Kategoriat'
         ordering = ['name']
 
     def __str__(self):
+        """Palauttaa kategorian nimen."""
         return self.name
 
 class PlantSpecies(models.Model):
@@ -54,11 +56,13 @@ class PlantSpecies(models.Model):
     nelson_garden_url = models.URLField('Nelson Garden URL', blank=True, default='')
 
     class Meta:
+        """Metatiedot PlantSpecies-mallille."""
         verbose_name = 'Kasvilaji'
         verbose_name_plural = 'Kasvilajit'
         ordering = ['kategoria', 'nimi']
 
     def __str__(self):
+        """Palauttaa kasvilajin nimen, sisältäen lajikkeen nimen jos se on määritelty."""
         if self.lajike:
             return f"{self.nimi} '{self.lajike}'"
         return self.nimi
@@ -104,11 +108,13 @@ class MyGarden(models.Model):
     lisatty = models.DateTimeField('Lisätty', auto_now_add=True)
 
     class Meta:
+        """Metatiedot MyGarden-mallille."""
         verbose_name = 'Viljelymerkintä'
         verbose_name_plural = 'Viljelymerkinnät'
         ordering = ['-lisatty']
 
     def __str__(self):
+        """Palauttaa viljelymerkinnän tiedot sisältäen kasvilajin ja tilan."""
         return f"{self.kasvilaji} — {self.get_tila_display()}"
 
     def arvioitu_sato(self):
@@ -133,9 +139,11 @@ class GardenNote(models.Model):
     havainto = models.TextField('Havainto')
 
     class Meta:
+        """Metatiedot GardenNote-mallille."""
         verbose_name = 'Havainto'
         verbose_name_plural = 'Havainnot'
         ordering = ['-paivamaara']
 
     def __str__(self):
+        """Palauttaa havainnon alun tekstiesityksenä."""
         return f"{self.paivamaara} — {self.havainto[:50]}"

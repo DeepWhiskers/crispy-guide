@@ -178,9 +178,11 @@ KASVIT = [
 
 
 class Command(BaseCommand):
+    """Django-komento esimerkkikasvien lataamiseksi tietokantaan."""
     help = 'Lataa esimerkkikasvit tietokantaan'
 
     def handle(self, *args, **options):
+        """Suorittaa komennon ja tallentaa kasvit tietokantaan."""
         # Mappings for initial setup
         category_map = {
             'Chili': '🌶️ Chili',
